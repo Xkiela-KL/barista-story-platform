@@ -19,7 +19,7 @@ services:
       StoryApi__PublicBaseUrl: ${API_PUBLIC_URL:-https://api.xkiela.dev}
       StoryApi__DataDirectory: /data
       StoryApi__AdminApiKey: ${ADMIN_API_KEY:?ADMIN_API_KEY in .env setzen}
-      StoryApi__CorsOrigins__0: ${SITE_PUBLIC_URL:-https://tv.xkiela.dev}
+      StoryApi__CorsOrigins__0: ${SITE_PUBLIC_URL:-https://stories.xkiela.dev}
       StoryApi__SeedPlaceholderContent: ${SEED_CONTENT:-true}
     volumes:
       - story-data:/data           # content.json + Mediathek (Cover, Vorschaubilder)
@@ -42,7 +42,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       StoryWeb__ApiBaseUrl: http://story-api:8080     # intern im Docker-Netz, nicht über das Internet
-      StoryWeb__PublicBaseUrl: ${SITE_PUBLIC_URL:-https://tv.xkiela.dev}
+      StoryWeb__PublicBaseUrl: ${SITE_PUBLIC_URL:-https://stories.xkiela.dev}
       StoryWeb__MediaOrigin: ${API_PUBLIC_URL:-https://api.xkiela.dev}
       StoryWeb__AllowIndexing: ${ALLOW_INDEXING:-false}
       StoryWeb__Legal__Name: ${LEGAL_NAME:-}

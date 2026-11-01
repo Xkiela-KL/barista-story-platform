@@ -13,7 +13,7 @@ public static class CorsSetup
         var origins = config.GetSection($"{ApiOptions.Section}:CorsOrigins").Get<string[]>() ?? [];
         return services.AddCors(o => o.AddPolicy(PublicPolicy, p =>
         {
-            // Only GET from the listed origins (e.g. https://tv.xkiela.dev). The website itself calls the API
+            // Only GET from the listed origins (e.g. https://stories.xkiela.dev). The website itself calls the API
             // server-side, so this matters only for future browser or app clients.
             if (origins.Length > 0) p.WithOrigins(origins).WithMethods("GET").WithHeaders("Accept");
         }));

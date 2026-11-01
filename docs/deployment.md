@@ -17,7 +17,7 @@ unten in einem Durchgang und bricht ab, bevor er etwas ändert, wenn etwas nicht
 2. holt den Code nach `X:\Repository\barista-story-platform` und baut API und Website
 3. fragt beim ersten Mal die Impressumsangaben ab (Enter = später)
 4. führt auf dem Pi `deploy/pi-setup.sh` aus:
-   - prüft Docker, die Ports 8086/8087 und ob `tv.`/`api.xkiela.dev` im Tunnel schon anders belegt sind
+   - prüft Docker, die Ports 8086/8087 und ob `stories.`/`api.xkiela.dev` im Tunnel schon anders belegt sind
    - legt `/opt/xkstories/.env` mit einem neu erzeugten Verwaltungsschlüssel an (nur beim ersten Mal)
    - startet die Container und wartet auf `/health`
    - sichert `/etc/cloudflared/config.yml`, fügt die zwei Regeln vor der Catch-all-Regel ein, prüft sie mit
@@ -40,7 +40,7 @@ Auf dem PC in PowerShell. Schreibt die Übersicht nach `X:\temp\pi-inventar.txt`
 ssh xkiela@raspberrypi "ss -tlnp; echo ---; ls -la /opt; echo ---; cat /etc/cloudflared/config.yml; echo ---; docker ps --format '{{.Names}} {{.Image}} {{.Ports}}'" | Out-File -Encoding utf8 X:\temp\pi-inventar.txt
 ```
 
-Prüfen: Sind 8086 und 8087 frei? Gibt es schon Regeln für `tv.` oder `api.xkiela.dev`? Falls ein Port belegt
+Prüfen: Sind 8086 und 8087 frei? Gibt es schon Regeln für `stories.` oder `api.xkiela.dev`? Falls ein Port belegt
 ist, `WEB_PORT`/`API_PORT` in `.env` ändern und in der Tunnel-Regel unten übernehmen.
 
 Im Cloudflare-Dashboard unter DNS nachsehen, worauf der Wildcard-Eintrag `*.xkiela.dev` zeigt. Zeigt er bereits
@@ -62,7 +62,7 @@ chmod 600 /opt/xkstories/.env
 `/etc/cloudflared/config.yml` sichern und **vor** der Catch-all-Regel `http_status:404` ergänzen:
 
 ```yaml
-  - hostname: tv.xkiela.dev
+  - hostname: stories.xkiela.dev
     service: http://localhost:8086
   - hostname: api.xkiela.dev
     service: http://localhost:8087
@@ -72,7 +72,7 @@ chmod 600 /opt/xkstories/.env
 sudo cp /etc/cloudflared/config.yml /etc/cloudflared/config.yml.bak.$(date +%Y%m%d%H%M%S)
 sudo nano /etc/cloudflared/config.yml
 cloudflared tunnel ingress validate
-cloudflared tunnel route dns <TUNNEL-ID> tv.xkiela.dev
+cloudflared tunnel route dns <TUNNEL-ID> stories.xkiela.dev
 cloudflared tunnel route dns <TUNNEL-ID> api.xkiela.dev
 sudo systemctl restart cloudflared
 ```

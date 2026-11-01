@@ -8,7 +8,7 @@ public sealed class SiteOptions
     public string ApiBaseUrl { get; set; } = "http://localhost:5087";
 
     /// <summary>Public URL of this website, used for canonical links, sitemap and social previews.</summary>
-    public string PublicBaseUrl { get; set; } = "https://tv.xkiela.dev";
+    public string PublicBaseUrl { get; set; } = "https://stories.xkiela.dev";
 
     /// <summary>Origin that serves images (the API's public URL). Added to the Content-Security-Policy.</summary>
     public string MediaOrigin { get; set; } = "https://api.xkiela.dev";

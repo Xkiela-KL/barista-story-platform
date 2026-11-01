@@ -3,7 +3,7 @@
 Website und REST-API für **XKStories**, die Marke für illustrierte Krimi- und Mystery-Serien.
 Erste Serie: **Barista Life** (Part 1 „19 Uhr 58“, Part 2 „Der Anruf“, Part 3 „Die Falle“).
 
-- Website: `tv.xkiela.dev` (Blazor, statisches Server-Rendering)
+- Website: `stories.xkiela.dev` (Blazor, statisches Server-Rendering)
 - API: `api.xkiela.dev` (ASP.NET Core Minimal API)
 - Hosting: Docker auf dem Raspberry Pi hinter dem bestehenden Cloudflare Tunnel
 

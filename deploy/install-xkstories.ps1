@@ -122,9 +122,9 @@ try {
     if ($exitCode -ne 0) { throw "Einrichtung auf dem Pi abgebrochen. Details: $PiLog" }
 
     Write-Host ""
-    Write-Host "Fertig: https://tv.xkiela.dev" -ForegroundColor Green
+    Write-Host "Fertig: https://stories.xkiela.dev" -ForegroundColor Green
     Write-Host "Protokolle: $PiLog und $PcLog"
-    Start-Process "https://tv.xkiela.dev"
+    Start-Process "https://stories.xkiela.dev"
     $exitCode = 0
 }
 catch {

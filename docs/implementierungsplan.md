@@ -9,15 +9,15 @@ Stand: 1. November 2026
 | REST-API | Es gab noch keine API für die Plattform. Sie wird in diesem Repo neu gebaut. Das GitHub-Repo `API-123` ist leer und wird nicht verwendet. |
 | Hosting | Raspberry Pi (`xkiela@raspberrypi`, Debian 13, arm64, 1,8 GB RAM). Apps laufen als systemd-Dienste unter `/opt` oder in Docker auf `127.0.0.1`. Docker ist seit dem `training-planner` installiert. Quelle: `training-planner/docs/deployment.md`, Stand 5.10.2026. |
 | Öffentliches Routing | Cloudflare Tunnel (`cloudflared.service`, lokale Konfiguration `/etc/cloudflared/config.yml`) mit Catch-all-404. Keine offenen Ports im Heimnetz. |
-| DNS | `xkiela.dev` bei Cloudflare (Nameserver `athena`/`tate`). Jede Subdomain löst auf Cloudflare-Adressen auf, es gibt also einen Wildcard-Eintrag. `tv.`, `stories.` und `api.xkiela.dev` haben noch keine Tunnel-Regel (Abruf schlägt fehl). |
+| DNS | `xkiela.dev` bei Cloudflare (Nameserver `athena`/`tate`). Jede Subdomain löst auf Cloudflare-Adressen auf, es gibt also einen Wildcard-Eintrag. `tv.`, `stories.` und `api.xkiela.dev` hatten noch keine Tunnel-Regel. |
 | Cloudflare-Konto | Keine Workers, keine D1-Datenbanken, R2 nicht aktiviert. DNS-Einträge und Tunnel-Konfiguration waren von hier aus nicht lesbar. **Vor dem Deployment auf dem Pi prüfen** (siehe Deployment). |
 | Stack-Vorbild | `training-planner`: .NET 10, Blazor, EF Core, PostgreSQL, Docker Compose, Deployment per `deploy.sh`. |
 | Inhalte | `X:\Packages\BaristaLife-Storyclips\Folgen` mit Part 1–3 (Bilder 1024×1536, Renders 1080×1920, Untertitel-Stile). |
 
 ## 2. Entscheidungen
 
-**Subdomain: `tv.xkiela.dev` für die Website, `api.xkiela.dev` für die API.**
-`tv.` passt zur Vision eines eigenen Senders, ist kurz und am Telefon leicht zu sagen. Verschachtelte Namen wie
+**Subdomain: `stories.xkiela.dev` für die Website, `api.xkiela.dev` für die API.**
+`stories.` ist deine Wahl (zuerst lief die Seite kurz unter `tv.xkiela.dev`; der Installer hat die Regel umbenannt). Verschachtelte Namen wie
 `api.stories.xkiela.dev` scheiden aus: Das kostenlose Universal-SSL-Zertifikat von Cloudflare deckt nur eine
 Subdomain-Ebene ab. Langfristig ist eine eigene Marken-Domain (z. B. `xkstories.de`) sinnvoll; die Adressen sind
 nur Konfiguration (`SITE_PUBLIC_URL`, `API_PUBLIC_URL`), ein Umzug braucht dann eine 301-Weiterleitung in Cloudflare.

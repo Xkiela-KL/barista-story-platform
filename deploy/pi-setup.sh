@@ -11,7 +11,10 @@ set -euo pipefail
 UPLOAD="$HOME/xkstories-upload"
 DIR=${XK_DIR:-/opt/xkstories}
 CONFIG=${XK_CF_CONFIG:-/etc/cloudflared/config.yml}
-SITE_HOST=tv.xkiela.dev
+SITE_HOST=stories.xkiela.dev
+# Frühere Adressen der Website. Zeigt eine davon im Tunnel noch auf die Website, wird sie umbenannt.
+OLD_SITE_HOSTS=(tv.xkiela.dev)
+RENAME_FROM=""
 API_HOST=api.xkiela.dev
 LOG="$UPLOAD/install.log"
 STAMP=$(date +%Y%m%d%H%M%S)
@@ -63,6 +66,13 @@ if [ -f "$CONFIG" ]; then
       esac
     fi
   done
+
+  for old in "${OLD_SITE_HOSTS[@]}"; do
+    if grep -A1 -E "hostname:[[:space:]]*${old}[[:space:]]*$" "$CONFIG" | grep -qE "service:[[:space:]]*http://localhost:${WEB_PORT}[[:space:]]*$"; then
+      RENAME_FROM=$old
+      ok "Alte Adresse $old wird zu $SITE_HOST umbenannt"
+    fi
+  done
   grep -qE '^[[:space:]]*-[[:space:]]*service:[[:space:]]*http_status:404' "$CONFIG" || fail "Keine Catch-all-Regel 'http_status:404' in $CONFIG gefunden. Bitte Regeln von Hand ergänzen (docs/deployment.md)."
 else
   warn "$CONFIG fehlt. Container werden eingerichtet, Tunnel-Regeln bitte von Hand ergänzen."
@@ -72,7 +82,7 @@ fi
 declare -A BEFORE
 EXISTING=()
 if [ -f "$CONFIG" ]; then
-  mapfile -t EXISTING < <(awk '/hostname:/{print $NF}' "$CONFIG" | grep -vE "^($SITE_HOST|$API_HOST)$" || true)
+  mapfile -t EXISTING < <(awk '/hostname:/{print $NF}' "$CONFIG" | grep -vE "^($SITE_HOST|$API_HOST${RENAME_FROM:+|$RENAME_FROM})$" || true)
   for h in "${EXISTING[@]}"; do
     BEFORE[$h]=$(curl -s -o /dev/null -m 15 -w '%{http_code}' "https://$h/" || echo 000)
     echo "   vorher $h -> ${BEFORE[$h]}"
@@ -110,7 +120,13 @@ if [ ! -f "$DIR/.env" ]; then
   chmod 600 "$DIR/.env"
   ok ".env mit neuem Verwaltungsschlüssel angelegt (nur auf dem Pi gespeichert)"
 else
-  ok ".env vorhanden, bleibt unverändert"
+  if ! grep -qE "^SITE_PUBLIC_URL=https://${SITE_HOST}$" "$DIR/.env"; then
+    old_url=$(grep -E '^SITE_PUBLIC_URL=' "$DIR/.env" | cut -d= -f2- || true)
+    if [ -n "$old_url" ]; then sed -i "s|^SITE_PUBLIC_URL=.*|SITE_PUBLIC_URL=https://${SITE_HOST}|" "$DIR/.env"; else echo "SITE_PUBLIC_URL=https://${SITE_HOST}" >> "$DIR/.env"; fi
+    ok ".env: Adresse der Website ${old_url:-(leer)} -> https://$SITE_HOST"
+  else
+    ok ".env vorhanden, bleibt unverändert"
+  fi
 fi
 rm -f "$UPLOAD/legal.env"
 
@@ -138,19 +154,27 @@ else
   sudo cp "$CONFIG" "$BACKUP"
   ok "Sicherung: $BACKUP"
   NEW=$(mktemp)
-  awk -v site="$SITE_HOST" -v api="$API_HOST" -v wp="$WEB_PORT" -v ap="$API_PORT" '
-    !done && /^[[:space:]]*-[[:space:]]*service:[[:space:]]*http_status:404/ {
-      match($0, /^[[:space:]]*/); ind = substr($0, 1, RLENGTH)
-      print ind "- hostname: " site; print ind "  service: http://localhost:" wp
-      print ind "- hostname: " api;  print ind "  service: http://localhost:" ap
-      done = 1
-    }
-    { print }' "$CONFIG" > "$NEW"
+  cp "$CONFIG" "$NEW"
+  if [ -n "$RENAME_FROM" ] && ! grep -qE "hostname:[[:space:]]*${SITE_HOST}[[:space:]]*$" "$NEW"; then
+    sed -i -E "s/(hostname:[[:space:]]*)${RENAME_FROM//./\\.}[[:space:]]*$/\1${SITE_HOST}/" "$NEW"
+  fi
+  # Fehlende Regeln vor der Catch-all-Regel einfügen
+  for pair in "$SITE_HOST:$WEB_PORT" "$API_HOST:$API_PORT"; do
+    h=${pair%%:*}; port=${pair##*:}
+    grep -qE "hostname:[[:space:]]*${h}[[:space:]]*$" "$NEW" && continue
+    awk -v host="$h" -v port="$port" '
+      !done && /^[[:space:]]*-[[:space:]]*service:[[:space:]]*http_status:404/ {
+        match($0, /^[[:space:]]*/); ind = substr($0, 1, RLENGTH)
+        print ind "- hostname: " host; print ind "  service: http://localhost:" port
+        done = 1
+      }
+      { print }' "$NEW" > "$NEW.tmp" && mv "$NEW.tmp" "$NEW"
+  done
   if ! cloudflared tunnel --config "$NEW" ingress validate; then
     rm -f "$NEW"; fail "Neue Tunnel-Konfiguration ungültig. Nichts geändert."
   fi
   sudo cp "$NEW" "$CONFIG"; rm -f "$NEW"
-  ok "Regeln eingefügt und geprüft"
+  ok "Regeln eingetragen und geprüft"
   for h in "$SITE_HOST" "$API_HOST"; do
     if out=$(cloudflared tunnel route dns "$TUNNEL" "$h" 2>&1); then ok "DNS-Route $h"; else
       echo "$out" | grep -qi "already exists" && ok "DNS-Eintrag $h existiert bereits" || warn "DNS-Route $h: $out"
