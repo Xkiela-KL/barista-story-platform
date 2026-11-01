@@ -15,7 +15,9 @@ param(
     [string]$PiHost = "xkiela@raspberrypi",
     [string]$Repo = "X:\Repository\barista-story-platform",
     [string]$RepoUrl = "https://github.com/Xkiela-KL/barista-story-platform.git",
-    [string]$LogDir = "X:\temp"
+    [string]$LogDir = "X:\temp",
+    # Ohne Rückfragen: Impressumsangaben bleiben leer und können später in /opt/xkstories/.env ergänzt werden.
+    [switch]$NoPrompt
 )
 
 $ErrorActionPreference = "Stop"
@@ -85,7 +87,10 @@ try {
     & ssh $PiHost "test -f /opt/xkstories/.env"
     $firstInstall = $LASTEXITCODE -ne 0
     $ErrorActionPreference = "Stop"
-    if ($firstInstall) {
+    if ($firstInstall -and $NoPrompt) {
+        Ok "Impressumsangaben übersprungen (später in /opt/xkstories/.env ergänzen)"
+    }
+    elseif ($firstInstall) {
         Write-Host ""
         Write-Host "   Erste Installation: Angaben für Impressum und Datenschutz." -ForegroundColor Cyan
         Write-Host "   Enter lässt ein Feld leer; es steht dann als Lücke markiert auf der Seite und kann später" -ForegroundColor Cyan
