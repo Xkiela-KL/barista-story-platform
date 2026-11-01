@@ -1,4 +1,5 @@
-@if (Links.Count > 0)
+@{ var links = Links.Where(l => !string.IsNullOrWhiteSpace(l.Url)).ToList(); }
+@if (links.Count > 0)
 {
     <div class="social">
         @if (Heading is not null)
@@ -6,11 +7,9 @@
             <p class="social-heading">@Heading</p>
         }
         <ul class="social-list">
-            @foreach (var link in Links)
+            @foreach (var link in links)
             {
                 <li>
-                    @if (link.Url is not null)
-                    {
                         <a class="social-link" href="@link.Url" rel="noopener" target="_blank">
                             <span class="social-platform">@Ui.PlatformName(link.Platform)</span>
                             @if (!string.IsNullOrWhiteSpace(link.Handle))
@@ -19,14 +18,6 @@
                             }
                             <span class="visually-hidden">(öffnet in neuem Fenster)</span>
                         </a>
-                    }
-                    else
-                    {
-                        <span class="social-link is-pending">
-                            <span class="social-platform">@Ui.PlatformName(link.Platform)</span>
-                            <span class="social-handle">Link folgt</span>
-                        </span>
-                    }
                 </li>
             }
         </ul>

@@ -5,21 +5,22 @@
 
 <article class="wrap section legal">
     <h1 class="page-title">Datenschutzerklärung</h1>
-    <p class="legal-warning" role="note">Vorlage: Bitte vor der Veröffentlichung mit Ihren Angaben vervollständigen und rechtlich prüfen lassen.</p>
-
     <h2>Das Wichtigste in Kürze</h2>
     <p>Diese Website setzt keine Cookies, verwendet keine Analyse- oder Werbedienste und lädt keine Schriften oder Skripte von fremden Servern. Benutzerkonten gibt es nicht.</p>
 
-    <h2>Verantwortlicher</h2>
-    <p>
-        <Fill Value="@L.Name" Missing="Vor- und Nachname" /><br />
-        <Fill Value="@L.Street" Missing="Straße und Hausnummer" /><br />
-        <Fill Value="@L.PostalCodeAndCity" Missing="PLZ und Ort" /><br />
-        E-Mail: <Fill Value="@L.Email" Missing="E-Mail-Adresse" />
-    </p>
+    @if (!string.IsNullOrWhiteSpace(L.Name))
+    {
+        <h2>Verantwortlicher</h2>
+        <p>
+            @L.Name
+            @if (!string.IsNullOrWhiteSpace(L.Street)) { <br />@L.Street }
+            @if (!string.IsNullOrWhiteSpace(L.PostalCodeAndCity)) { <br />@L.PostalCodeAndCity }
+            @if (!string.IsNullOrWhiteSpace(L.Email)) { <br /><span>E-Mail: @L.Email</span> }
+        </p>
+    }
 
     <h2>Aufruf der Website</h2>
-    <p>Beim Aufruf verarbeitet der Server technisch notwendige Daten: IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, Browser und Betriebssystem. Sie werden nur verwendet, um die Website auszuliefern und ihre Sicherheit zu gewährleisten, und nicht mit anderen Daten zusammengeführt. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; unser berechtigtes Interesse ist ein sicherer und stabiler Betrieb. Protokolldaten werden nach spätestens <Fill Value="" Missing="Speicherdauer, z. B. 7 Tagen" /> gelöscht.</p>
+    <p>Beim Aufruf verarbeitet der Server technisch notwendige Daten: IP-Adresse, Datum und Uhrzeit, aufgerufene Seite, Browser und Betriebssystem. Sie werden nur verwendet, um die Website auszuliefern und ihre Sicherheit zu gewährleisten, und nicht mit anderen Daten zusammengeführt. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO; unser berechtigtes Interesse ist ein sicherer und stabiler Betrieb. Protokolldaten werden nur so lange gespeichert, wie es für diesen Zweck erforderlich ist.</p>
 
     <h2>Cloudflare</h2>
     <p>Die Website wird über das Netzwerk von Cloudflare ausgeliefert (Cloudflare, Inc., 101 Townsend St., San Francisco, CA 94107, USA). Cloudflare stellt die verschlüsselte Verbindung bereit und schützt vor Angriffen. Dabei verarbeitet Cloudflare die oben genannten Verbindungsdaten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Cloudflare ist nach dem EU-US Data Privacy Framework zertifiziert; zusätzlich besteht ein Auftragsverarbeitungsvertrag. Weitere Informationen: <a href="https://www.cloudflare.com/de-de/privacypolicy/" rel="noopener" target="_blank">Datenschutzerklärung von Cloudflare</a>.</p>

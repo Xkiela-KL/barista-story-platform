@@ -5,29 +5,26 @@
 
 <article class="wrap section legal">
     <h1 class="page-title">Impressum</h1>
-    @if (Missing)
+    @if (HasAddress)
     {
-        <p class="legal-warning" role="note">Vorlage: Markierte Angaben fehlen noch (Einstellung <code>StoryWeb:Legal</code>). Bitte vor der Veröffentlichung ergänzen und rechtlich prüfen lassen.</p>
+        <h2>Angaben gemäß § 5 DDG</h2>
+        <p>@L.Name<br />@L.Street<br />@L.PostalCodeAndCity</p>
     }
 
-    <h2>Angaben gemäß § 5 DDG</h2>
-    <p>
-        <Fill Value="@L.Name" Missing="Vor- und Nachname" /><br />
-        <Fill Value="@L.Street" Missing="Straße und Hausnummer" /><br />
-        <Fill Value="@L.PostalCodeAndCity" Missing="PLZ und Ort" />
-    </p>
+    @if (!string.IsNullOrWhiteSpace(L.Email) || !string.IsNullOrWhiteSpace(L.Phone))
+    {
+        <h2>Kontakt</h2>
+        <p>
+            @if (!string.IsNullOrWhiteSpace(L.Email)) { <span>E-Mail: @L.Email</span><br /> }
+            @if (!string.IsNullOrWhiteSpace(L.Phone)) { <span>Telefon: @L.Phone</span> }
+        </p>
+    }
 
-    <h2>Kontakt</h2>
-    <p>
-        E-Mail: <Fill Value="@L.Email" Missing="E-Mail-Adresse" />
-        @if (!string.IsNullOrWhiteSpace(L.Phone))
-        {
-            <br /><span>Telefon: @L.Phone</span>
-        }
-    </p>
-
-    <h2>Verantwortlich für den Inhalt</h2>
-    <p><Fill Value="@(string.IsNullOrWhiteSpace(L.ResponsibleForContent) ? L.Name : L.ResponsibleForContent)" Missing="Name" />, Anschrift wie oben.</p>
+    @if (HasAddress)
+    {
+        <h2>Verantwortlich für den Inhalt</h2>
+        <p>@(string.IsNullOrWhiteSpace(L.ResponsibleForContent) ? L.Name : L.ResponsibleForContent), Anschrift wie oben.</p>
+    }
 
     <h2>Haftung für Links</h2>
     <p>Diese Website verweist auf Folgen bei Instagram und TikTok. Für die Inhalte dieser externen Seiten sind ausschließlich deren Betreiber verantwortlich. Bei Bekanntwerden von Rechtsverletzungen entfernen wir entsprechende Links umgehend.</p>
@@ -38,5 +35,5 @@
 
 @code {
     private LegalOptions L => Site.Value.Legal;
-    private bool Missing => new[] { L.Name, L.Street, L.PostalCodeAndCity, L.Email }.Any(string.IsNullOrWhiteSpace);
+    private bool HasAddress => !string.IsNullOrWhiteSpace(L.Name) && !string.IsNullOrWhiteSpace(L.Street) && !string.IsNullOrWhiteSpace(L.PostalCodeAndCity);
 }
