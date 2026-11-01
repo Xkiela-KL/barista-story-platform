@@ -1,0 +1,35 @@
+@* Homepage hero: the most important series and, above all, when its next episode airs. *@
+<section class="hero" aria-labelledby="hero-title">
+    @if (Series.HeroUrl is not null)
+    {
+        <img class="hero-backdrop" src="@Series.HeroUrl" alt="" aria-hidden="true" />
+    }
+    <div class="wrap hero-grid">
+        <div class="hero-text">
+            <p class="eyebrow">@Ui.HeroEyebrow(Series)</p>
+            <h1 id="hero-title" class="endcard-title hero-title">@Series.Title</h1>
+            <p class="hero-genres">@Ui.Genres(Series.Genres) · Staffel @Math.Max(1, Series.SeasonCount) · @Ui.Count(Series.PublishedEpisodeCount, Series.EpisodeTerm) online</p>
+            <NextEpisodeSlot Episode="Next" Now="Now" />
+            <div class="actions">
+                <a class="btn btn-primary" href="@Ui.SeriesUrl(Series.Slug)">Zur Serie</a>
+                <a class="btn btn-secondary" href="@($"{Ui.SeriesUrl(Series.Slug)}#folgen")">Alle Folgen</a>
+            </div>
+        </div>
+        <figure class="hero-still">
+            @if (Series.HeroUrl is not null)
+            {
+                <img src="@Series.HeroUrl" alt="Szene aus @Series.Title" width="1024" height="1536" fetchpriority="high" />
+            }
+            @if (!string.IsNullOrWhiteSpace(Series.Tagline))
+            {
+                <figcaption class="subtitle subtitle-hero"><span class="subtitle-line">@Series.Tagline</span></figcaption>
+            }
+        </figure>
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public SeriesSummary Series { get; set; } = default!;
+    [Parameter] public EpisodeView? Next { get; set; }
+    [Parameter, EditorRequired] public DateTimeOffset Now { get; set; }
+}

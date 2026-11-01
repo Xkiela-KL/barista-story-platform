@@ -1,0 +1,48 @@
+@inject IOptions<SiteOptions> Site
+@inject NavigationManager Nav
+
+<PageTitle>@FullTitle</PageTitle>
+<HeadContent>
+    <meta name="description" content="@Description" />
+    <link rel="canonical" href="@CanonicalUrl" />
+    @if (!Site.Value.AllowIndexing)
+    {
+        <meta name="robots" content="noindex" />
+    }
+    <meta property="og:site_name" content="@SiteName" />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:type" content="@OgType" />
+    <meta property="og:title" content="@(Title ?? SiteName)" />
+    <meta property="og:description" content="@Description" />
+    <meta property="og:url" content="@CanonicalUrl" />
+    @if (Image is not null)
+    {
+        <meta property="og:image" content="@Image" />
+        <meta name="twitter:card" content="summary_large_image" />
+    }
+    else
+    {
+        <meta name="twitter:card" content="summary" />
+    }
+    @if (JsonLd is not null)
+    {
+        <script type="application/ld+json">@((MarkupString)JsonLd)</script>
+    }
+</HeadContent>
+
+@code {
+    [CascadingParameter] public ChannelView? Channel { get; set; }
+    /// <summary>Page title without the site name; null on the homepage.</summary>
+    [Parameter] public string? Title { get; set; }
+    [Parameter] public string Description { get; set; } = "";
+    [Parameter] public string? Image { get; set; }
+    [Parameter] public string OgType { get; set; } = "website";
+    /// <summary>Pre-serialised schema.org JSON (see <see cref="SchemaOrg"/>).</summary>
+    [Parameter] public string? JsonLd { get; set; }
+
+    private string SiteName => Channel?.Name ?? Brand.Fallback;
+    private string FullTitle => Title is null
+        ? (string.IsNullOrWhiteSpace(Channel?.Claim) ? SiteName : $"{SiteName} – {Channel.Claim}")
+        : $"{Title} | {SiteName}";
+    private string CanonicalUrl => Site.Value.PublicBaseUrl.TrimEnd('/') + "/" + Nav.ToBaseRelativePath(Nav.Uri).Split('?', '#')[0];
+}

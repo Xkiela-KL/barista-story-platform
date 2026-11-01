@@ -1,0 +1,71 @@
+@page "/programm"
+@inject StoryApiClient Api
+@inject TimeProvider Clock
+
+<PageMeta Title="Programm" Description="Wann erscheint die nächste Folge? Der Sendeplan der kommenden zwei Wochen, alle Zeiten in deutscher Zeit." />
+
+@if (failed)
+{
+    <ApiUnavailable />
+    return;
+}
+
+<section class="wrap section">
+    <h1 class="page-title">Programm</h1>
+    <p class="lead">Alle neuen Folgen der nächsten 14 Tage. Alle Uhrzeiten in deutscher Zeit (@(BerlinTime.Zone.IsDaylightSavingTime(BerlinTime.ToBerlin(now)) ? "MESZ" : "MEZ")).</p>
+
+    @if (days.Count == 0)
+    {
+        <div class="empty-panel">
+            <p>In den nächsten zwei Wochen sind keine neuen Folgen geplant. Sobald neue Termine feststehen, finden Sie sie hier.</p>
+            <a class="btn btn-secondary" href="/serien">Alle Serien ansehen</a>
+        </div>
+    }
+    else
+    {
+        @foreach (var day in days)
+        {
+            <section class="day" aria-labelledby="@($"tag-{day.Key:yyyyMMdd}")">
+                <h2 class="day-title" id="@($"tag-{day.Key:yyyyMMdd}")">
+                    @if (day.Key == todayDate) { <span class="rec-dot" aria-hidden="true"></span> }
+                    @DayHeading(day.Key)
+                </h2>
+                <ScheduleList Entries="day.Value" Now="now" />
+            </section>
+        }
+    }
+</section>
+
+@code {
+    private DateTimeOffset now;
+    private DateOnly todayDate;
+    private bool failed;
+    private List<KeyValuePair<DateOnly, List<EpisodeView>>> days = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        now = Clock.GetUtcNow();
+        todayDate = BerlinTime.DateOf(now);
+        try
+        {
+            var schedule = await Api.ScheduleAsync(todayDate, 14);
+            days = (schedule?.Entries ?? [])
+                .GroupBy(e => BerlinTime.DateOf(e.ReleaseAt!.Value))
+                .OrderBy(g => g.Key)
+                .Select(g => new KeyValuePair<DateOnly, List<EpisodeView>>(g.Key, g.ToList()))
+                .ToList();
+        }
+        catch (ApiUnavailableException)
+        {
+            failed = true;
+        }
+    }
+
+    private string DayHeading(DateOnly date)
+    {
+        var at = BerlinTime.StartOfDay(date).AddHours(12);
+        var relative = BerlinTime.RelativeDay(at, now);
+        var full = $"{BerlinTime.Weekday(at)}, {BerlinTime.DayMonth(at)}";
+        return relative is "Heute" or "Morgen" ? $"{relative} · {full}" : full;
+    }
+}

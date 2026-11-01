@@ -1,0 +1,27 @@
+@if (Episode.Status == EpisodeStatus.Published && Episode.VideoSources.Count > 0)
+{
+    <div class="watch">
+        @foreach (var source in Episode.VideoSources)
+        {
+            <a class="btn btn-primary" href="@source.Url" rel="noopener" target="_blank">
+                Ansehen auf @Ui.PlatformName(source.Platform)<span class="visually-hidden"> (öffnet in neuem Fenster)</span>
+            </a>
+        }
+    </div>
+}
+else if (Episode.Status == EpisodeStatus.Published)
+{
+    <p class="watch-pending">Der Link zur Folge wird noch ergänzt.</p>
+}
+else if (Episode is { Status: EpisodeStatus.Scheduled, ReleaseAt: { } at })
+{
+    <p class="watch-pending">Erscheint @BerlinTime.LongDate(at) um @BerlinTime.Clock(at) Uhr.</p>
+}
+else
+{
+    <p class="watch-pending">Der Sendetermin steht noch nicht fest.</p>
+}
+
+@code {
+    [Parameter, EditorRequired] public EpisodeView Episode { get; set; } = default!;
+}

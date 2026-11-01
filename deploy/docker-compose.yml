@@ -1,0 +1,62 @@
+# XKStories auf dem Raspberry Pi: REST-API + Website, erreichbar nur über 127.0.0.1 (Cloudflare Tunnel davor).
+#   cp .env.example .env   # ADMIN_API_KEY setzen, Impressumsangaben eintragen
+#   docker compose up -d --build
+name: xkstories
+
+services:
+  story-api:
+    build:
+      context: ${BUILD_CONTEXT:-..}
+      dockerfile: ${DOCKERFILE:-deploy/Dockerfile}
+      args:
+        PROJECT: StoryPlatform.Api
+        APP: api
+        DLL: StoryPlatform.Api.dll
+    image: xkstories-api:latest
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      StoryApi__PublicBaseUrl: ${API_PUBLIC_URL:-https://api.xkiela.dev}
+      StoryApi__DataDirectory: /data
+      StoryApi__AdminApiKey: ${ADMIN_API_KEY:?ADMIN_API_KEY in .env setzen}
+      StoryApi__CorsOrigins__0: ${SITE_PUBLIC_URL:-https://tv.xkiela.dev}
+      StoryApi__SeedPlaceholderContent: ${SEED_CONTENT:-true}
+    volumes:
+      - story-data:/data           # content.json + Mediathek (Cover, Vorschaubilder)
+    ports:
+      - "127.0.0.1:${API_PORT:-8087}:8080"
+    mem_limit: 256m
+    networks: [stories]
+
+  story-web:
+    build:
+      context: ${BUILD_CONTEXT:-..}
+      dockerfile: ${DOCKERFILE:-deploy/Dockerfile}
+      args:
+        PROJECT: StoryPlatform.Web
+        APP: web
+        DLL: StoryPlatform.Web.dll
+    image: xkstories-web:latest
+    restart: unless-stopped
+    depends_on: [story-api]
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      StoryWeb__ApiBaseUrl: http://story-api:8080     # intern im Docker-Netz, nicht über das Internet
+      StoryWeb__PublicBaseUrl: ${SITE_PUBLIC_URL:-https://tv.xkiela.dev}
+      StoryWeb__MediaOrigin: ${API_PUBLIC_URL:-https://api.xkiela.dev}
+      StoryWeb__AllowIndexing: ${ALLOW_INDEXING:-false}
+      StoryWeb__Legal__Name: ${LEGAL_NAME:-}
+      StoryWeb__Legal__Street: ${LEGAL_STREET:-}
+      StoryWeb__Legal__PostalCodeAndCity: ${LEGAL_CITY:-}
+      StoryWeb__Legal__Email: ${LEGAL_EMAIL:-}
+      StoryWeb__Legal__Phone: ${LEGAL_PHONE:-}
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8086}:8080"
+    mem_limit: 256m
+    networks: [stories]
+
+volumes:
+  story-data:
+
+networks:
+  stories:

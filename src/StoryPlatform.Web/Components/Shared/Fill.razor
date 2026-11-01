@@ -1,0 +1,14 @@
+@* Shows a legal value, or a clearly visible gap when it has not been configured yet. *@
+@if (string.IsNullOrWhiteSpace(Value))
+{
+    <mark class="gap">[@Missing eintragen]</mark>
+}
+else
+{
+    @Value
+}
+
+@code {
+    [Parameter] public string? Value { get; set; }
+    [Parameter, EditorRequired] public string Missing { get; set; } = "";
+}

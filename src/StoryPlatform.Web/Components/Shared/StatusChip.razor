@@ -1,0 +1,29 @@
+@if (ShowStatus)
+{
+@switch (Episode.Status)
+{
+    case EpisodeStatus.Published:
+        <span class="chip chip-published">Veröffentlicht</span>
+        break;
+    case EpisodeStatus.Scheduled:
+        <span class="chip chip-scheduled">Demnächst</span>
+        break;
+    default:
+        <span class="chip chip-open">Termin folgt</span>
+        break;
+}
+}
+@if (!string.IsNullOrWhiteSpace(Episode.Label))
+{
+    <span class="chip chip-label">@Episode.Label</span>
+}
+@if (Episode.IsPlaceholder)
+{
+    <PlaceholderBadge Text="Beispieltermin" />
+}
+
+@code {
+    [Parameter, EditorRequired] public EpisodeView Episode { get; set; } = default!;
+    /// <summary>False where the status is already written out next to the chips.</summary>
+    [Parameter] public bool ShowStatus { get; set; } = true;
+}

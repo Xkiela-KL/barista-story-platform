@@ -1,0 +1,20 @@
+<section class="wrap section">
+    <div class="empty-panel" role="status">
+        <h1 class="section-title">Das Programm lädt gerade nicht</h1>
+        <p>Die Inhalte sind im Moment nicht erreichbar. Bitte versuchen Sie es in ein paar Minuten noch einmal.</p>
+    </div>
+</section>
+
+@code {
+    [CascadingParameter] public HttpContext? Http { get; set; }
+
+    protected override void OnInitialized()
+    {
+        // 503 tells Cloudflare and search engines that this is temporary; it is also never output-cached.
+        if (Http is { Response.HasStarted: false })
+        {
+            Http.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
+            Http.Response.Headers.RetryAfter = "120";
+        }
+    }
+}

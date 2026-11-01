@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+    <!-- Pages are rendered as plain HTML on the server (static SSR) and need no blazor.web.js.
+         Set to true (or remove) when interactive components are added later, e.g. for member areas. -->
+    <RequiresAspNetWebAssets>false</RequiresAspNetWebAssets>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StoryPlatform.Contracts\StoryPlatform.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

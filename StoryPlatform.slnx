@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/StoryPlatform.Api/StoryPlatform.Api.csproj" />
+    <Project Path="src/StoryPlatform.Contracts/StoryPlatform.Contracts.csproj" />
+    <Project Path="src/StoryPlatform.Web/StoryPlatform.Web.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,10 @@
+bin/
+obj/
+artifacts/
+.vs/
+.vscode/
+.idea/
+*.user
+# Laufzeitdaten der API (content.json, hochgeladene Bilder)
+src/StoryPlatform.Api/data/
+deploy/.env

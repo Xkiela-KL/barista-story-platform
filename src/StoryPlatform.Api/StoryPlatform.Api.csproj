@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\StoryPlatform.Contracts\StoryPlatform.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Example images for the placeholder programme; copied into the media library on first start. -->
+    <None Include="SeedMedia\**" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <Content Remove="data\**" />
+    <None Remove="data\**" />
+  </ItemGroup>
+
+</Project>

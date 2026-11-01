@@ -1,0 +1,42 @@
+@* One series as a wide row: cover left, facts right. Works for one series or many. *@
+<article class="series-row">
+    <a class="series-row-cover" href="@Ui.SeriesUrl(Series.Slug)" tabindex="-1" aria-hidden="true">
+        @if (Series.CoverUrl is not null)
+        {
+            <img src="@Series.CoverUrl" alt="" loading="lazy" width="800" height="1200" />
+        }
+    </a>
+    <div class="series-row-body">
+        <p class="eyebrow">@Ui.Genres(Series.Genres) · @Ui.StateText(Series.State)</p>
+        <h3 class="series-row-title"><a href="@Ui.SeriesUrl(Series.Slug)">@Series.Title</a></h3>
+        @if (!string.IsNullOrWhiteSpace(Series.Tagline))
+        {
+            <p class="series-row-tagline">@Series.Tagline</p>
+        }
+        <dl class="facts">
+            <div><dt>Staffeln</dt><dd>@Series.SeasonCount</dd></div>
+            <div><dt>Veröffentlicht</dt><dd>@Series.PublishedEpisodeCount von @Series.EpisodeCount</dd></div>
+            <div>
+                <dt>Nächster Termin</dt>
+                <dd>
+                    @if (Series.NextEpisode is { ReleaseAt: { } at } next)
+                    {
+                        @($"{BerlinTime.RelativeDay(at, Now)}, {BerlinTime.Clock(at)} Uhr")
+                        @if (next.IsPlaceholder) { <PlaceholderBadge Text="Beispieltermin" /> }
+                    }
+                    else
+                    {
+                        <span>noch offen</span>
+                    }
+                </dd>
+            </div>
+        </dl>
+        <a class="btn btn-secondary" href="@Ui.SeriesUrl(Series.Slug)">Zur Serie</a>
+        @if (Series.IsPlaceholder) { <PlaceholderBadge /> }
+    </div>
+</article>
+
+@code {
+    [Parameter, EditorRequired] public SeriesSummary Series { get; set; } = default!;
+    [Parameter, EditorRequired] public DateTimeOffset Now { get; set; }
+}

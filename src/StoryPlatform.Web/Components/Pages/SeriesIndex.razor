@@ -1,0 +1,41 @@
+@page "/serien"
+@inject StoryApiClient Api
+@inject TimeProvider Clock
+
+<PageMeta Title="Serien" Description="Alle Krimi- und Mystery-Serien mit Staffeln, Folgen und Sendeterminen." />
+
+@if (failed)
+{
+    <ApiUnavailable />
+    return;
+}
+
+<section class="wrap section">
+    <h1 class="page-title">Serien</h1>
+    @if (series.Count == 0)
+    {
+        <p class="empty">Hier erscheinen bald die ersten Serien.</p>
+    }
+    else
+    {
+        <div class="series-list">
+            @foreach (var s in series)
+            {
+                <SeriesRow Series="s" Now="now" />
+            }
+        </div>
+    }
+</section>
+
+@code {
+    private DateTimeOffset now;
+    private bool failed;
+    private List<SeriesSummary> series = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        now = Clock.GetUtcNow();
+        try { series = await Api.SeriesAsync() ?? []; }
+        catch (ApiUnavailableException) { failed = true; }
+    }
+}

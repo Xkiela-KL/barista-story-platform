@@ -1,0 +1,9 @@
+<span class="badge-placeholder" title="@Hint">@Text</span>
+
+@code {
+    /// <summary>"Beispiel" for example series, "Beispieltermin" for example release dates.</summary>
+    [Parameter] public string Text { get; set; } = "Beispiel";
+    private string Hint => Text == "Beispieltermin"
+        ? "Platzhalter: Dieser Termin ist ein Beispiel und noch kein echter Sendetermin."
+        : "Platzhalter: Beispielinhalt, keine echte Veröffentlichung.";
+}

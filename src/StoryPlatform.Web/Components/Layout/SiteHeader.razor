@@ -1,0 +1,17 @@
+<header class="site-header">
+    <div class="wrap header-inner">
+        <a class="wordmark" href="/" aria-label="@Name – zur Startseite">
+            <span class="wordmark-prefix">@Brand.Prefix(Name)</span><span class="wordmark-rest">@Brand.Rest(Name)</span>
+        </a>
+        <nav class="main-nav" aria-label="Hauptnavigation">
+            <NavLink href="/" Match="NavLinkMatch.All">Start</NavLink>
+            <NavLink href="/programm">Programm</NavLink>
+            <NavLink href="/serien">Serien</NavLink>
+        </nav>
+    </div>
+</header>
+
+@code {
+    [Parameter] public ChannelView? Channel { get; set; }
+    private string Name => Channel?.Name ?? Brand.Fallback;
+}

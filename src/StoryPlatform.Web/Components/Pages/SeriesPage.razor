@@ -1,0 +1,118 @@
+@page "/serien/{Slug}"
+@inject StoryApiClient Api
+@inject TimeProvider Clock
+@inject NavigationManager Nav
+@inject IOptions<SiteOptions> Site
+
+@if (failed)
+{
+    <PageMeta Title="Serie" />
+    <ApiUnavailable />
+    return;
+}
+@if (series is null)
+{
+    return;
+}
+
+<PageMeta Title="@series.Summary.Title" Description="@series.Description" Image="@series.Summary.SocialImageUrl"
+          OgType="video.tv_show" JsonLd="@SchemaOrg.Series(series, Site.Value.PublicBaseUrl + Ui.SeriesUrl(series.Summary.Slug))" />
+
+<section class="series-head">
+    @if (series.Summary.HeroUrl is not null)
+    {
+        <img class="hero-backdrop" src="@series.Summary.HeroUrl" alt="" aria-hidden="true" />
+    }
+    <div class="wrap series-head-grid">
+        <div class="series-head-cover">
+            @if (series.Summary.CoverUrl is not null)
+            {
+                <img src="@series.Summary.CoverUrl" alt="Cover von @series.Summary.Title" width="800" height="1200" />
+            }
+        </div>
+        <div class="series-head-text">
+            <p class="eyebrow">@Ui.Genres(series.Summary.Genres) · @Ui.StateText(series.Summary.State)</p>
+            <h1 class="endcard-title">@series.Summary.Title</h1>
+            @if (!string.IsNullOrWhiteSpace(series.Summary.Tagline))
+            {
+                <p class="series-tagline">@series.Summary.Tagline</p>
+            }
+            <p class="series-description">@series.Description</p>
+            <NextEpisodeSlot Episode="series.Summary.NextEpisode" Now="now" />
+            @if (series.SocialLinks.Count > 0)
+            {
+                <SocialLinks Links="series.SocialLinks" Heading="Die Serie auf" />
+            }
+            @if (series.Summary.IsPlaceholder) { <PlaceholderBadge /> }
+        </div>
+    </div>
+</section>
+
+<section class="wrap section" id="folgen" aria-labelledby="folgen-title">
+    <h2 class="section-title" id="folgen-title">Alle Folgen</h2>
+    @if (series.Seasons.Count > 1)
+    {
+        <nav class="season-nav" aria-label="Staffeln">
+            @foreach (var season in series.Seasons)
+            {
+                <a href="@($"{Ui.SeriesUrl(series.Summary.Slug)}#staffel-{season.Number}")">Staffel @season.Number</a>
+            }
+        </nav>
+    }
+    @foreach (var season in series.Seasons)
+    {
+        <section class="season" id="@($"staffel-{season.Number}")" aria-labelledby="@($"staffel-{season.Number}-titel")">
+            <h3 class="season-title" id="@($"staffel-{season.Number}-titel")">
+                Staffel @season.Number@(string.IsNullOrWhiteSpace(season.Title) ? "" : $": {season.Title}")
+            </h3>
+            @if (!string.IsNullOrWhiteSpace(season.Description))
+            {
+                <p>@season.Description</p>
+            }
+            <ol class="episode-list">
+                @foreach (var e in season.Episodes)
+                {
+                    <li class="episode-row">
+                        <a class="episode-row-still" href="@Ui.EpisodeUrl(e)" tabindex="-1" aria-hidden="true">
+                            @if (e.ThumbnailUrl is not null)
+                            {
+                                <img src="@e.ThumbnailUrl" alt="" loading="lazy" width="600" height="900" />
+                            }
+                        </a>
+                        <div class="episode-row-body">
+                            <p class="episode-row-code">@Ui.EpisodeCodeShort(e)@(e.DurationSeconds is null ? "" : " · " + Ui.Duration(e.DurationSeconds))</p>
+                            <h4 class="episode-row-title"><a href="@Ui.EpisodeUrl(e)">@e.Title</a></h4>
+                            <p class="episode-row-synopsis">@e.Synopsis</p>
+                            <p class="episode-row-status">
+                                <strong>@Ui.StatusText(e, now)</strong>
+                                <StatusChip Episode="e" ShowStatus="false" />
+                            </p>
+                            <WatchLinks Episode="e" />
+                        </div>
+                    </li>
+                }
+            </ol>
+        </section>
+    }
+</section>
+
+@code {
+    [Parameter] public string Slug { get; set; } = "";
+    private DateTimeOffset now;
+    private bool failed;
+    private SeriesDetail? series;
+
+    protected override async Task OnInitializedAsync()
+    {
+        now = Clock.GetUtcNow();
+        try
+        {
+            series = await Api.SeriesAsync(Slug);
+            if (series is null) Nav.NotFound();
+        }
+        catch (ApiUnavailableException)
+        {
+            failed = true;
+        }
+    }
+}

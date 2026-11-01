@@ -1,0 +1,30 @@
+@inherits LayoutComponentBase
+@inject StoryApiClient Api
+
+<a class="skip-link" href="#inhalt">Zum Inhalt springen</a>
+<SiteHeader Channel="channel" />
+@if (channel?.HasPlaceholderContent == true)
+{
+    <div class="notice" role="note">
+        <div class="wrap notice-inner">
+            <PlaceholderBadge Text="Beispieltermin" />
+            <p>Vorschau: So markierte Sendetermine sind Platzhalter. Die echten Termine werden noch eingetragen.</p>
+        </div>
+    </div>
+}
+<CascadingValue Value="channel" IsFixed="true">
+    <main id="inhalt" tabindex="-1">
+        @Body
+    </main>
+</CascadingValue>
+<SiteFooter Channel="channel" />
+
+@code {
+    private ChannelView? channel;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try { channel = await Api.ChannelAsync(); }
+        catch (ApiUnavailableException) { channel = null; }
+    }
+}

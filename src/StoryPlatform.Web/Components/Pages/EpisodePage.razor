@@ -1,0 +1,92 @@
+@page "/serien/{Slug}/{EpisodeSlug}"
+@inject StoryApiClient Api
+@inject TimeProvider Clock
+@inject NavigationManager Nav
+@inject IOptions<SiteOptions> Site
+
+@if (failed)
+{
+    <PageMeta Title="Folge" />
+    <ApiUnavailable />
+    return;
+}
+@if (episode is null)
+{
+    return;
+}
+
+<PageMeta Title="@($"{episode.Title} – {episode.SeriesTitle}")" Description="@episode.Synopsis" Image="@episode.ThumbnailUrl" OgType="video.episode"
+          JsonLd="@SchemaOrg.Episode(episode, Site.Value.PublicBaseUrl + Ui.EpisodeUrl(episode), Site.Value.PublicBaseUrl + Ui.SeriesUrl(episode.SeriesSlug))" />
+
+<nav class="wrap breadcrumb" aria-label="Brotkrümelnavigation">
+    <a href="/serien">Serien</a> <span aria-hidden="true">›</span>
+    <a href="@Ui.SeriesUrl(episode.SeriesSlug)">@episode.SeriesTitle</a> <span aria-hidden="true">›</span>
+    <span aria-current="page">@Ui.EpisodeCodeShort(episode)</span>
+</nav>
+
+<article class="wrap section episode">
+    <figure class="episode-still">
+        @if (episode.ThumbnailUrl is not null)
+        {
+            <img src="@episode.ThumbnailUrl" alt="Szene aus @episode.SeriesTitle, @Ui.EpisodeCodeShort(episode)" width="600" height="900" />
+        }
+        <figcaption class="subtitle subtitle-card">
+            <span class="subtitle-label">@episode.SeriesTitle</span>
+            <span class="subtitle-line">@Ui.EpisodeCodeShort(episode) · @episode.Title</span>
+        </figcaption>
+    </figure>
+    <div class="episode-text">
+        <p class="eyebrow">@Ui.EpisodeCode(episode)</p>
+        <h1 class="endcard-title episode-title">@episode.Title</h1>
+        <p class="episode-status">
+            <strong>@Ui.StatusText(episode, now)</strong>
+            @if (episode.DurationSeconds is not null) { <span> · @Ui.Duration(episode.DurationSeconds)</span> }
+            <StatusChip Episode="episode" ShowStatus="false" />
+        </p>
+        @if (episode is { Status: EpisodeStatus.Scheduled, ReleaseAt: { } at })
+        {
+            <p class="episode-countdown"><Countdown At="at" Now="now" /></p>
+        }
+        <p class="episode-synopsis">@episode.Synopsis</p>
+        <WatchLinks Episode="episode" />
+
+        <nav class="episode-nav" aria-label="Weitere Folgen">
+            @if (previous is not null)
+            {
+                <a href="@Ui.EpisodeUrl(previous)"><span>Vorherige</span> @Ui.EpisodeCodeShort(previous) · @previous.Title</a>
+            }
+            @if (following is not null)
+            {
+                <a href="@Ui.EpisodeUrl(following)"><span>Nächste</span> @Ui.EpisodeCodeShort(following) · @following.Title</a>
+            }
+            <a href="@($"{Ui.SeriesUrl(episode.SeriesSlug)}#folgen")"><span>Übersicht</span> Alle Folgen von @episode.SeriesTitle</a>
+        </nav>
+    </div>
+</article>
+
+@code {
+    [Parameter] public string Slug { get; set; } = "";
+    [Parameter] public string EpisodeSlug { get; set; } = "";
+    private DateTimeOffset now;
+    private bool failed;
+    private EpisodeView? episode, previous, following;
+
+    protected override async Task OnInitializedAsync()
+    {
+        now = Clock.GetUtcNow();
+        try
+        {
+            var series = await Api.SeriesAsync(Slug);
+            var all = series?.Seasons.SelectMany(s => s.Episodes).ToList() ?? [];
+            var index = all.FindIndex(e => e.Slug == EpisodeSlug);
+            if (index < 0) { Nav.NotFound(); return; }
+            episode = all[index];
+            previous = index > 0 ? all[index - 1] : null;
+            following = index < all.Count - 1 ? all[index + 1] : null;
+        }
+        catch (ApiUnavailableException)
+        {
+            failed = true;
+        }
+    }
+}

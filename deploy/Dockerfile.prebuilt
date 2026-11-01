@@ -1,0 +1,13 @@
+# Verpackt eine auf dem Entwicklungsrechner veröffentlichte Anwendung (deploy.sh), damit der Pi nicht kompilieren muss.
+ARG APP=api
+FROM mcr.microsoft.com/dotnet/aspnet:10.0
+ARG APP
+ARG DLL
+ENV ASPNETCORE_HTTP_PORTS=8080 DOTNET_gcServer=0 APP_DLL=${DLL}
+WORKDIR /app
+COPY app/${APP}/ .
+# /data gehört dem App-Benutzer, damit das Docker-Volume beschreibbar ist.
+RUN mkdir -p /data && chown "$APP_UID" /data
+USER $APP_UID
+EXPOSE 8080
+ENTRYPOINT ["sh", "-c", "exec dotnet \"$APP_DLL\""]

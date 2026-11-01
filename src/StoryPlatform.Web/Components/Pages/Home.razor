@@ -1,0 +1,118 @@
+@page "/"
+@inject StoryApiClient Api
+@inject TimeProvider Clock
+
+@if (failed)
+{
+    <PageMeta Description="Krimi und Mystery in Serie." />
+    <ApiUnavailable />
+    return;
+}
+
+<PageMeta Description="@(channel?.Description ?? "")" Image="@featured?.Series.SocialImageUrl" />
+
+@if (featured is not null)
+{
+    <HeroFeatured Series="featured.Series" Next="featured.NextEpisode" Now="now" />
+}
+else
+{
+    <section class="wrap section">
+        <h1 class="endcard-title">@(channel?.Name ?? Brand.Fallback)</h1>
+        <p class="empty">Hier erscheinen bald die ersten Serien.</p>
+    </section>
+}
+
+<section class="band" aria-label="Programm">
+    <div class="wrap guide-columns">
+        <div>
+            <h2 class="section-title"><span class="rec-dot" aria-hidden="true"></span>Heute im Programm</h2>
+            <p class="section-sub">@BerlinTime.LongDate(now)</p>
+            <ScheduleList Entries="today" Now="now" EmptyText="Heute erscheint keine neue Folge." />
+        </div>
+        <div>
+            <h2 class="section-title">Demnächst</h2>
+            <p class="section-sub">Die nächsten sieben Tage</p>
+            <ScheduleList Entries="upcoming" Now="now" ShowDay="true"
+                          EmptyText="Zurzeit sind keine weiteren Folgen geplant. Neue Termine stehen hier, sobald sie feststehen." />
+            <p class="more"><a href="/programm">Ganzes Programm ansehen</a></p>
+        </div>
+    </div>
+</section>
+
+@if (latest.Count > 0)
+{
+    <section class="wrap section" aria-labelledby="neu">
+        <h2 id="neu" class="section-title">Neue Folgen</h2>
+        <div class="ep-grid">
+            @foreach (var e in latest)
+            {
+                <EpisodeCard Episode="e" />
+            }
+        </div>
+    </section>
+}
+
+@if (series.Count > 0)
+{
+    <section class="wrap section" aria-labelledby="serien">
+        <h2 id="serien" class="section-title">Unsere Serien</h2>
+        <div class="series-list">
+            @foreach (var s in series)
+            {
+                <SeriesRow Series="s" Now="now" />
+            }
+        </div>
+    </section>
+}
+
+@if (channel is not null && channel.SocialLinks.Count > 0)
+{
+    <section class="band band-follow" aria-labelledby="folgen">
+        <div class="wrap follow">
+            <div>
+                <h2 id="folgen" class="section-title">Neue Folgen nicht verpassen</h2>
+                <p>Jede neue Folge erscheint zuerst auf Instagram und TikTok. Den Sendeplan finden Sie immer hier.</p>
+            </div>
+            <SocialLinks Links="channel.SocialLinks" />
+        </div>
+    </section>
+}
+
+@code {
+    private DateTimeOffset now;
+    private bool failed;
+    private ChannelView? channel;
+    private FeaturedView? featured;
+    private List<EpisodeView> today = [];
+    private List<EpisodeView> upcoming = [];
+    private List<EpisodeView> latest = [];
+    private List<SeriesSummary> series = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        now = Clock.GetUtcNow();
+        var todayDate = BerlinTime.DateOf(now);
+        try
+        {
+            var channelTask = Api.ChannelAsync();
+            var featuredTask = Api.FeaturedAsync();
+            var scheduleTask = Api.ScheduleAsync(todayDate, 8);
+            var latestTask = Api.LatestAsync(8);
+            var seriesTask = Api.SeriesAsync();
+            await Task.WhenAll(channelTask, featuredTask, scheduleTask, latestTask, seriesTask);
+
+            channel = channelTask.Result;
+            featured = featuredTask.Result;
+            var entries = scheduleTask.Result?.Entries ?? [];
+            today = entries.Where(e => BerlinTime.DateOf(e.ReleaseAt!.Value) == todayDate).ToList();
+            upcoming = entries.Where(e => BerlinTime.DateOf(e.ReleaseAt!.Value) > todayDate).Take(6).ToList();
+            latest = latestTask.Result ?? [];
+            series = seriesTask.Result ?? [];
+        }
+        catch (ApiUnavailableException)
+        {
+            failed = true;
+        }
+    }
+}

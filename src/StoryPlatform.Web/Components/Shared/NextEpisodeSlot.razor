@@ -1,0 +1,24 @@
+@* Answers "when is the next episode?" at a glance. Set like the clip's end card. *@
+<div class="next-slot">
+    <p class="next-label">Nächste Folge</p>
+    @if (Episode is { ReleaseAt: { } at })
+    {
+        <p class="next-time"><time datetime="@Ui.Iso(at)">@Ui.NextSlot(at, Now)</time></p>
+        <p class="next-episode">
+            <a href="@Ui.EpisodeUrl(Episode)">@Ui.EpisodeCode(Episode) · „@Episode.Title“</a>
+        </p>
+        <p class="next-countdown">
+            <Countdown At="at" Now="Now" />
+            @if (Episode.IsPlaceholder) { <PlaceholderBadge Text="Beispieltermin" /> }
+        </p>
+    }
+    else
+    {
+        <p class="next-none">Für diese Serie ist gerade keine neue Folge geplant.</p>
+    }
+</div>
+
+@code {
+    [Parameter] public EpisodeView? Episode { get; set; }
+    [Parameter, EditorRequired] public DateTimeOffset Now { get; set; }
+}

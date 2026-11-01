@@ -1,0 +1,28 @@
+<footer class="site-footer">
+    <div class="wrap footer-inner">
+        <div class="footer-brand">
+            <p class="wordmark wordmark-small"><span class="wordmark-prefix">@Brand.Prefix(Name)</span><span class="wordmark-rest">@Brand.Rest(Name)</span></p>
+            @if (!string.IsNullOrWhiteSpace(Channel?.Claim))
+            {
+                <p class="footer-claim">@Channel.Claim</p>
+            }
+            <p class="footer-note">Alle Sendezeiten in deutscher Zeit (MEZ/MESZ).</p>
+        </div>
+        @if (Channel is not null)
+        {
+            <SocialLinks Links="Channel.SocialLinks" Heading="Folgen Sie uns" />
+        }
+        <nav class="footer-nav" aria-label="Rechtliches">
+            <a href="/impressum">Impressum</a>
+            <a href="/datenschutz">Datenschutz</a>
+        </nav>
+    </div>
+    <div class="wrap footer-base">
+        <p>© @DateTime.UtcNow.Year @Name. Keine Cookies, kein Tracking.</p>
+    </div>
+</footer>
+
+@code {
+    [Parameter] public ChannelView? Channel { get; set; }
+    private string Name => Channel?.Name ?? Brand.Fallback;
+}

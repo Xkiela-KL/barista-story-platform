@@ -1,0 +1,30 @@
+@* Still with the episode name set like the clip subtitles: amber label above a white line on a dark box. *@
+<article class="ep-card">
+    <a class="ep-card-link" href="@Ui.EpisodeUrl(Episode)">
+        <div class="ep-card-media">
+            @if (Episode.ThumbnailUrl is not null)
+            {
+                <img src="@Episode.ThumbnailUrl" alt="" loading="lazy" width="600" height="900" />
+            }
+            <p class="subtitle subtitle-card">
+                <span class="subtitle-label">@Ui.EpisodeCodeShort(Episode)</span>
+                <span class="subtitle-line">@Episode.Title</span>
+            </p>
+        </div>
+    </a>
+    <p class="ep-card-meta">
+        <span>@Episode.SeriesTitle</span>
+        @if (Episode.ReleaseAt is { } at)
+        {
+            <span>@(Episode.Status == EpisodeStatus.Published ? "Seit" : "Ab") @BerlinTime.ShortDate(at)@(Episode.DurationSeconds is null ? "" : " · " + Ui.Duration(Episode.DurationSeconds))</span>
+        }
+    </p>
+    @if (Episode.IsPlaceholder)
+    {
+        <PlaceholderBadge Text="Beispieltermin" />
+    }
+</article>
+
+@code {
+    [Parameter, EditorRequired] public EpisodeView Episode { get; set; } = default!;
+}
