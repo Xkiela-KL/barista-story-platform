@@ -1,0 +1,8 @@
+# Dateien, die auf dem Pi laufen, brauchen Linux-Zeilenenden (auch bei Checkout unter Windows).
+*.sh text eol=lf
+*.yml text eol=lf
+.env.example text eol=lf
+Dockerfile* text eol=lf
+# Windows-Starter
+*.cmd text eol=crlf
+*.ps1 text eol=crlf

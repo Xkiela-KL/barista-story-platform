@@ -28,6 +28,7 @@ var app = builder.Build();
 // Load (or seed) content at startup so a broken content.json fails fast.
 _ = app.Services.GetRequiredService<IContentStore>().Current;
 
+app.UseForwardedHttpsRedirect();
 app.UseForwardedHeaders();
 app.UsePublicCacheHeaders();
 app.UseMediaLibrary();

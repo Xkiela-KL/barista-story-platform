@@ -8,6 +8,30 @@ Besucher ─https─> Cloudflare ─Tunnel─> cloudflared (Pi) ─> 127.0.0.1:8
                                                         └> 127.0.0.1:8087  story-api (Bilder, Verwaltung)
 ```
 
+## Schnellweg: Installer (empfohlen)
+
+`deploy/XKStories-installieren.cmd` doppelklicken (liegt auch unter `X:\temp\XKStories`). Er erledigt die Schritte 1–4
+unten in einem Durchgang und bricht ab, bevor er etwas ändert, wenn etwas nicht passt:
+
+1. prüft Git, .NET 10 SDK, ssh/scp und die Verbindung zum Pi
+2. holt den Code nach `X:\Repository\barista-story-platform` und baut API und Website
+3. fragt beim ersten Mal die Impressumsangaben ab (Enter = später)
+4. führt auf dem Pi `deploy/pi-setup.sh` aus:
+   - prüft Docker, die Ports 8086/8087 und ob `tv.`/`api.xkiela.dev` im Tunnel schon anders belegt sind
+   - legt `/opt/xkstories/.env` mit einem neu erzeugten Verwaltungsschlüssel an (nur beim ersten Mal)
+   - startet die Container und wartet auf `/health`
+   - sichert `/etc/cloudflared/config.yml`, fügt die zwei Regeln vor der Catch-all-Regel ein, prüft sie mit
+     `cloudflared tunnel ingress validate`, legt die DNS-Routen an und startet `cloudflared` neu
+   - ruft alle bisherigen Hostnamen vorher und nachher auf; antwortet einer danach nicht mehr, wird die alte
+     Konfiguration automatisch zurückgespielt
+5. legt die Protokolle unter `X:\temp\xkstories-installation.log` (Pi) und `…-pc.log` ab
+
+Ein erneuter Start aktualisiert die Anwendung; `.env` und die Tunnel-Regeln bleiben dann unverändert.
+Den Verwaltungsschlüssel zeigt `ssh xkiela@raspberrypi "grep ADMIN_API_KEY /opt/xkstories/.env"`.
+Wurde zurückgerollt, bleiben die DNS-Einträge `tv`/`api` bestehen; sie zeigen auf den Tunnel und schaden nicht.
+
+Die folgenden Abschnitte beschreiben dieselben Schritte zum Nachvollziehen oder für die Einrichtung von Hand.
+
 ## 1. Bestand prüfen (nur lesen)
 
 Auf dem PC in PowerShell. Schreibt die Übersicht nach `X:\temp\pi-inventar.txt`:

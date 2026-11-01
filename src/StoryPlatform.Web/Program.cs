@@ -29,6 +29,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(o =>
 
 var app = builder.Build();
 
+app.UseForwardedHttpsRedirect();
 app.UseForwardedHeaders();
 if (!app.Environment.IsDevelopment())
 {
