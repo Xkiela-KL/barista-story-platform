@@ -8,3 +8,4 @@ artifacts/
 # Laufzeitdaten der API (content.json, hochgeladene Bilder)
 src/StoryPlatform.Api/data/
 deploy/.env
+src/StoryPlatform.Web/data/

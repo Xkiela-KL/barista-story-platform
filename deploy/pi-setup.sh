@@ -130,6 +130,14 @@ else
 fi
 rm -f "$UPLOAD/legal.env"
 
+# Besucherzahlen der Website (gleiches Format wie Portfolio, gelesen von XKWorkstation)
+if [ ! -d /var/lib/xkstories ]; then
+  sudo mkdir -p /var/lib/xkstories
+  sudo chown 1654:1654 /var/lib/xkstories   # App-Benutzer im Container
+  sudo chmod 755 /var/lib/xkstories
+  ok "/var/lib/xkstories für Besucherzahlen angelegt"
+fi
+
 cd "$DIR"
 docker compose up -d --build --remove-orphans
 for _ in $(seq 1 45); do
