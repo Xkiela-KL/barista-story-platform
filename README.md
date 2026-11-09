@@ -1,7 +1,8 @@
 # XKStories – Story-Plattform
 
 Website und REST-API für **XKStories**, die Marke für illustrierte Krimi- und Mystery-Serien.
-Erste Serie: **Barista Life** (Part 1 „19 Uhr 58“, Part 2 „Der Anruf“, Part 3 „Die Falle“).
+Erste Serie: **Barista Life** (Part 1 „19 Uhr 58“, Part 2 „Der Anruf“, Part 3 „Die Falle“, Part 4 „Das Erwachen“,
+Part 5 „Der Mann in der Ecke“, Part 6 „Nur gestreift“).
 
 - Website: `stories.xkiela.dev` (Blazor, statisches Server-Rendering)
 - API: `api.xkiela.dev` (ASP.NET Core Minimal API)
@@ -27,8 +28,8 @@ dotnet run --project src/StoryPlatform.Api   # http://localhost:5087
 dotnet run --project src/StoryPlatform.Web   # http://localhost:5086
 ```
 
-Beim ersten Start legt die API `src/StoryPlatform.Api/data/content.json` an: Barista Life mit Part 1–3
-und einem angekündigten Part 4. **Die Sendetermine sind Beispielwerte** und auf der Website als
+Beim ersten Start legt die API `src/StoryPlatform.Api/data/content.json` an: Barista Life mit Part 1–6
+und einem angekündigten Part 7. **Die Sendetermine sind Beispielwerte** und auf der Website als
 „Beispieltermin“ markiert, bis echte Termine eingetragen sind (siehe [Inhalte pflegen](docs/inhalte-pflegen.md)).
 Lokaler Verwaltungsschlüssel: `dev-key-nur-lokal`.
 
