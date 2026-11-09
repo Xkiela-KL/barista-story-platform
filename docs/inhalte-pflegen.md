@@ -83,3 +83,14 @@ Hero der Startseite; die niedrigste Zahl gewinnt. `episodeTerm` ist `"Folge"` od
 
 Solange eine Folge `isPlaceholder: true` hat, steht „Beispieltermin“ daneben und oben auf der Seite ein Hinweis.
 Sind alle auf `false`, verschwindet der Hinweis von selbst.
+
+## Barista Life Part 4–6 nachtragen
+
+Auf einer bestehenden Installation (mit vorhandener `content.json`) trägt dieses Skript Part 4–6 ein, ersetzt den
+Platzhalter „Part 4 · Titel folgt“ und kündigt Part 7 an. Es lädt die Vorschaubilder hoch, legt vorher eine Sicherung
+an und lässt vorhandene Folgen mit gleichem Kürzel unverändert.
+
+```powershell
+pwsh tools/update-barista-life-part4-6.ps1 -Key "DEIN-SCHLÜSSEL" -WhatIf   # Probe: schreibt nur barista-life-neu.json
+pwsh tools/update-barista-life-part4-6.ps1 -Key "DEIN-SCHLÜSSEL"
+```
